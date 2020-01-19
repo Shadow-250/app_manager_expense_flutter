@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 
@@ -121,7 +122,22 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
     final bool isLandscape = mediaQuery.orientation == Orientation.landscape;
-    final appBar = AppBar(
+    final PreferredSizeWidget appBar = Platform.isIOS ? 
+    CupertinoNavigationBar(
+      middle: Text(
+        'Personal Expenses',
+      ),
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          GestureDetector(
+            child: Icon(CupertinoIcons.add),
+            onTap: () => _startAddNewTransaction(context),
+          )
+        ],
+      )
+    ) 
+    : AppBar(
       title: Text(
         'Personal Expenses',
       ),
@@ -136,9 +152,8 @@ class _MyHomePageState extends State<MyHomePage> {
       height: (mediaQuery.size.height - appBar.preferredSize.height - mediaQuery.padding.top)*0.7,
       child: TransactionList(_userTransactions, _deleteTransaction),
     );
-    return Scaffold(
-      appBar: appBar, 
-      body: SingleChildScrollView(
+
+    final pageBody = SingleChildScrollView(
         child: Column(
           // mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -178,7 +193,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 : txListWidget
           ],
         ),
-      ),
+      );
+    return Platform.isIOS ? CupertinoPageScaffold(
+      child: pageBody,
+      navigationBar: appBar,
+    ) : Scaffold(
+      appBar: appBar, 
+      body: pageBody, 
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       floatingActionButton: Platform.isIOS ? Container() :
        FloatingActionButton(
